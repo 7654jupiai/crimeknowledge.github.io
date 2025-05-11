@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>知識王遊戲：朱令案</title>
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -224,7 +224,7 @@
 
             // 透過 EmailJS 發送結果
             emailjs.send('service_v7rofbx', 'template_0abs7qm', {
-                to_email: 'julianchen9417@gmail.com', // 老師的電子郵件
+                to_email: 'julianchen9417@gmail.com',
                 from_name: playerName,
                 message: message
             }).then(
