@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知識王遊戲：朱令案</title>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+        }
+        #question {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .option {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 80%;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .option:hover {
+            background: #0056b3;
+        }
+        #feedback {
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        #score {
+            font-size: 1.1em;
+            color: #28a745;
+        }
+        #next-btn, #submit-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+        #next-btn:hover, #submit-btn:hover {
+            background: #218838;
+        }
+        #start-screen, #result-screen {
+            margin: 20px 0;
+        }
+        #player-name {
+            padding: 10px;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+        #start-btn, #restart-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #start-btn:hover, #restart-btn:hover {
+            background: #218838;
+        }
+        #stats {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="start-screen">
+            <h1>知識王遊戲：朱令案</h1>
+            <label for="player-name">請輸入您的名稱：</label>
+            <input type="text" id="player-name" placeholder="輸入名稱">
+            <button id="start-btn" onclick="startGame()">開始遊戲</button>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <h1>知識王遊戲：朱令案</h1>
+            <div id="score">分數：0</div>
+            <div id="question"></div>
+            <div id="options"></div>
+            <div id="feedback"></div>
+            <button id="next-btn" onclick="nextQuestion()">下一題</button>
+        </div>
+        <div id="result-screen" style="display: none;">
+            <h1>遊戲結束！</h1>
+            <div id="final-score"></div>
+            <div id="accuracy"></div>
+            <div id="stats"></div>
+            <button id="submit-btn" onclick="submitResults()">提交結果給老師</button>
+            <button id="restart-btn" onclick="restartGame()">重新開始</button>
+        </div>
+    </div>
+
+    <script>
+        // 初始化 EmailJS（替換為你的 EmailJS Public Key）
+        emailjs.init('YOUR_EMAILJS_PUBLIC_KEY'); // 在 EmailJS 儀表板取得
+
+        const questions = [
+            {
+                question: "朱令在清華大學期間最初出現的症狀不包括下列哪一項？",
+                options: ["A. 短暫失明", "B. 頭髮大量脫落", "C. 幻覺與失憶", "D. 腹部劇痛"],
+                correct: "C"
+            },
+            {
+                question: "鉈中毒的解毒方式為何？",
+                options: ["A. 注射抗毒血清", "B. 注射活性炭", "C. 服用普魯士藍", "D. 腹腔洗滌"],
+                correct: "C"
+            },
+            {
+                question: "根據朱令案中，嫌疑人需要具備下列哪一項條件？",
+                options: ["A. 擁有醫學背景", "B. 與朱令有親屬關係", "C. 熟知朱令生活習慣並能接近其飲食起居", "D. 是校外人士"],
+                correct: "C"
+            },
+            {
+                question: "哪位人物於1995年首次透過網路尋求朱令案協助？",
+                options: ["A. 吳承之", "B. 孫維", "C. 貝志誠", "D. 朱鎔基"],
+                correct: "C"
+            },
+            {
+                question: "對於貝志誠發出的求助信與收到回覆的描述，下列何者正確？",
+                options: ["A. 收到超過一萬封回覆信", "B. 約有30%回信提到鉈中毒", "C. 實際有84位醫學專家指出是鉈中毒", "D. 所有回覆都來自美國醫學院"],
+                correct: "C"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let playerName = '';
+        let playerAnswers = [];
+        let allPlayersStats = JSON.parse(localStorage.getItem('knowledgeKingStats')) || [];
+
+        function startGame() {
+            playerName = document.getElementById('player-name').value.trim();
+            if (!playerName) {
+                alert('請輸入名稱！');
+                return;
+            }
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            score = 0;
+            currentQuestionIndex = 0;
+            playerAnswers = [];
+            document.getElementById('score').textContent = `分數：${score}`;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = question.question;
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = option;
+                button.onclick = () => checkAnswer(option);
+                optionsDiv.appendChild(button);
+            });
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        function checkAnswer(selected) {
+            const question = questions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            const correctOption = question.options.find(opt => opt.startsWith(question.correct));
+            const isCorrect = selected.startsWith(question.correct);
+            if (isCorrect) {
+                feedback.textContent = '正確！';
+                feedback.style.color = 'green';
+                score += 10;
+                document.getElementById('score').textContent = `分數：${score}`;
+            } else {
+                feedback.textContent = `錯誤！正確答案是 ${correctOption}`;
+                feedback.style.color = 'red';
+            }
+            playerAnswers.push({ question: question.question, selected, isCorrect });
+            document.querySelectorAll('.option').forEach(btn => btn.disabled = true);
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function submitResults() {
+            const correctCount = playerAnswers.filter(ans => ans.isCorrect).length;
+            const accuracy = ((correctCount / questions.length) * 100).toFixed(2);
+            let message = `玩家名稱: ${playerName}\n分數: ${score}\n正確率: ${accuracy}%\n\n答題詳情:\n`;
+            playerAnswers.forEach((ans, index) => {
+                message += `第${index + 1}題: ${ans.question}\n選擇: ${ans.selected}, 正確: ${ans.isCorrect ? '是' : '否'}\n\n`;
+            });
+
+            // 透過 EmailJS 發送結果
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+                to_email: 'TEACHER_EMAIL@example.com', // 替換為老師的電子郵件
+                from_name: playerName,
+                message: message
+            }).then(
+                () => {
+                    alert('結果已成功發送給老師！');
+                },
+                (error) => {
+                    console.error('發送失敗:', error);
+                    alert('結果發送失敗，請稍後重試或聯繫老師。');
+                }
+            );
+        }
+
+        function showResults() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+            const correctCount = playerAnswers.filter(ans => ans.isCorrect).length;
+            const accuracy = ((correctCount / questions.length) * 100).toFixed(2);
+            document.getElementById('final-score').textContent = `最終分數：${score}`;
+            document.getElementById('accuracy').textContent = `正確率：${accuracy}%`;
+            document.getElementById('submit-btn').style.display = 'block';
+
+            // 儲存本地歷史記錄
+            allPlayersStats.push({ playerName, score, accuracy, answers: playerAnswers });
+            localStorage.setItem('knowledgeKingStats', JSON.stringify(allPlayersStats));
+            const statsDiv = document.getElementById('stats');
+            statsDiv.innerHTML = '<h3>本地歷史記錄</h3>';
+            allPlayersStats.forEach(stat => {
+                statsDiv.innerHTML += `<p>${stat.playerName} - 分數：${stat.score}, 正確率：${stat.accuracy}%</p>`;
+            });
+        }
+
+        function restartGame() {
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'block';
+            document.getElementById('player-name').value = '';
+        }
+    </script>
+</body>
+</html>
