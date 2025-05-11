@@ -119,7 +119,7 @@
 
     <script>
         // 初始化 EmailJS（替換為你的 EmailJS Public Key）
-        emailjs.init('YOUR_EMAILJS_PUBLIC_KEY'); // 在 EmailJS 儀表板取得
+        emailjs.init('AHcIRTpPNDOzqkFTF'); // 在 EmailJS 儀表板取得
 
         const questions = [
             {
@@ -223,8 +223,8 @@
             });
 
             // 透過 EmailJS 發送結果
-            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
-                to_email: 'TEACHER_EMAIL@example.com', // 替換為老師的電子郵件
+            emailjs.send('service_v7rofbx', 'template_0abs7qm', {
+                to_email: 'julianchen9417@gmail.com', // 替換為老師的電子郵件
                 from_name: playerName,
                 message: message
             }).then(
