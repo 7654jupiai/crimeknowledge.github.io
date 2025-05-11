@@ -118,8 +118,8 @@
     </div>
 
     <script>
-        // 初始化 EmailJS（替換為你的 EmailJS Public Key）
-        emailjs.init('eXUflwTFDDwNi9SGr'); // 在 EmailJS 儀表板取得
+        // 初始化 EmailJS
+        emailjs.init('eXUflwTFDDwNi9SGr'); // 你的 Public Key
 
         const questions = [
             {
@@ -224,7 +224,7 @@
 
             // 透過 EmailJS 發送結果
             emailjs.send('service_v7rofbx', 'template_0abs7qm', {
-                to_email: 'julianchen9417@gmail.com', // 替換為老師的電子郵件
+                to_email: 'julianchen9417@gmail.com', // 老師的電子郵件
                 from_name: playerName,
                 message: message
             }).then(
@@ -233,7 +233,7 @@
                 },
                 (error) => {
                     console.error('發送失敗:', error);
-                    alert('結果發送失敗，請稍後重試或聯繫老師。');
+                    alert('結果發送失敗，請稍後重試或聯繫老師。錯誤訊息：' + JSON.stringify(error));
                 }
             );
         }
