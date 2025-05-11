@@ -119,7 +119,7 @@
 
     <script>
         // 初始化 EmailJS
-        emailjs.init('qSzQ1xK1eFME1JAhC'); // 更新為新的 Public Key
+        emailjs.init('qSzQ1xK1eFME1JAhC'); // 你的 Public Key
 
         const questions = [
             {
@@ -222,9 +222,8 @@
                 message += `第${index + 1}題: ${ans.question}\n選擇: ${ans.selected}, 正確: ${ans.isCorrect ? '是' : '否'}\n\n`;
             });
 
-            // 透過 EmailJS 發送結果
+            // 透過 EmailJS 發送結果，移除 to_email
             emailjs.send('service_j1qr5pp', 'template_fhvsto9', {
-                to_email: 'julianchen9417@gmail.com',
                 from_name: playerName,
                 message: message
             }).then(
