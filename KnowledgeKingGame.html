@@ -89,6 +89,11 @@
             margin-top: 20px;
             text-align: left;
         }
+        #detective-level {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -111,6 +116,7 @@
             <h1>遊戲結束！</h1>
             <div id="final-score"></div>
             <div id="accuracy"></div>
+            <div id="detective-level"></div>
             <div id="stats"></div>
             <button id="submit-btn" onclick="submitResults()">提交結果給老師</button>
             <button id="restart-btn" onclick="restartGame()">重新開始</button>
@@ -851,10 +857,19 @@
         let playerAnswers = [];
         let allPlayersStats = JSON.parse(localStorage.getItem('knowledgeKingStats')) || [];
 
-        // 隨機挑選 10 題
+        // 隨機挑選 20 題
         function selectRandomQuestions() {
             const shuffled = fullQuestionBank.sort(() => 0.5 - Math.random());
-            questions = shuffled.slice(0, 10);
+            questions = shuffled.slice(0, 20);
+        }
+
+        // 根據正確率計算等級
+        function getDetectiveLevel(accuracy) {
+            if (accuracy >= 90) return "柯南等級神探";
+            if (accuracy >= 75) return "鑑識高手";
+            if (accuracy >= 50) return "資深探員";
+            if (accuracy >= 25) return "初級調查員";
+            return "菜鳥偵探";
         }
 
         function startGame() {
@@ -920,7 +935,8 @@
         function submitResults() {
             const correctCount = playerAnswers.filter(ans => ans.isCorrect).length;
             const accuracy = ((correctCount / questions.length) * 100).toFixed(2);
-            let message = `玩家名稱: ${playerName}\n分數: ${score}\n正確率: ${accuracy}%\n\n答題詳情:\n`;
+            const detectiveLevel = getDetectiveLevel(accuracy);
+            let message = `玩家名稱: ${playerName}\n分數: ${score}\n正確率: ${accuracy}%\n等級: ${detectiveLevel}\n\n答題詳情:\n`;
             playerAnswers.forEach((ans, index) => {
                 message += `第${index + 1}題: ${ans.question}\n選擇: ${ans.selected}, 正確: ${ans.isCorrect ? '是' : '否'}\n\n`;
             });
@@ -945,17 +961,19 @@
             document.getElementById('result-screen').style.display = 'block';
             const correctCount = playerAnswers.filter(ans => ans.isCorrect).length;
             const accuracy = ((correctCount / questions.length) * 100).toFixed(2);
+            const detectiveLevel = getDetectiveLevel(accuracy);
             document.getElementById('final-score').textContent = `最終分數：${score}`;
             document.getElementById('accuracy').textContent = `正確率：${accuracy}%`;
+            document.getElementById('detective-level').textContent = `你的等級：${detectiveLevel}`;
             document.getElementById('submit-btn').style.display = 'block';
 
             // 儲存本地歷史記錄
-            allPlayersStats.push({ playerName, score, accuracy, answers: playerAnswers });
+            allPlayersStats.push({ playerName, score, accuracy, detectiveLevel, answers: playerAnswers });
             localStorage.setItem('knowledgeKingStats', JSON.stringify(allPlayersStats));
             const statsDiv = document.getElementById('stats');
             statsDiv.innerHTML = '<h3>本地歷史記錄</h3>';
             allPlayersStats.forEach(stat => {
-                statsDiv.innerHTML += `<p>${stat.playerName} - 分數：${stat.score}, 正確率：${stat.accuracy}%</p>`;
+                statsDiv.innerHTML += `<p>${stat.playerName} - 分數：${stat.score}, 正確率：${stat.accuracy}%, 等級：${stat.detectiveLevel}</p>`;
             });
         }
 
